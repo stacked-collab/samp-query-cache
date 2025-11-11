@@ -48,7 +48,7 @@ Incluye protección básica: **rate limiting por IP**, **blacklist temporal**, v
 ```bash
 
 # ejemplo: redirigir rango 66.70.160.240-243 a proxy local 7778 si contienen "SAMP"
-sudo iptables -t nat -A PREROUTING -p udp -m iprange --dst-range 66.70.160.240-66.70.160.243 --dport 7777 -m string --algo bm --string "SAMP" -j DNAT --to-destination 127.0.0.1:7778
+sudo iptables -t nat -A PREROUTING -p udp -m iprange --dst-range 66.70.160.240-66.70.160.243 --dport 7777 -m string --algo bm --string "SAMP" -j REDIRECT --to-port 7778
 
 # si sólo utilizas una dirección IP, la regla se vería así para redirigir al proxy local 7778 si contienen "SAMP"
 sudo iptables -t nat -A PREROUTING -p udp --dport 7777 -m string --algo bm --string "SAMP" -j REDIRECT --to-port 7778
