@@ -44,7 +44,7 @@ Incluye protección básica: **rate limiting por IP**, **blacklist temporal**, v
    - `SAMP_SERVER_LOCALHOST`: IP local donde responde el servidor SA-MP (`127.0.0.1` si corre en la misma máquina).
    - `SERVER_PORT` y `PROXY_PORT`.
 
-3. (Opcional) Instalar reglas `iptables` para redirigir queries:
+3. Instalar reglas `iptables` para redirigir queries:
 ```bash
 
 # ejemplo: redirigir rango 66.70.160.240-243 a proxy local 7778 si contienen "SAMP"
