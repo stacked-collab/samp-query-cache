@@ -1,4 +1,4 @@
-# SA-MP UDP Query Proxy
+# SA-MP Query Cache
 
 Un script en Python que ayuda a servidores SA-MP (San Andreas Multiplayer) a **mostrarse en línea** incluso bajo cargas de consultas UDP (floods).  
 Incluye protección básica: **rate limiting por IP**, **blacklist temporal**, validación de paquetes y caching de respuestas de consulta.
@@ -11,7 +11,7 @@ Incluye protección básica: **rate limiting por IP**, **blacklist temporal**, v
 +-----------------------+     +-------------------+     +-----------------------+
 |                       |     |                   |     |                       |
 |     SA-MP Client      |<--->|    UDP Proxy      |<--->|     SA-MP Server      |
-| (Game/Query Client)   |     |    (query.py)     |     |  (Game/Query Server)  |
+| (Game/Query Client)   |     |  (pack_scan.py)   |     |  (Game/Query Server)  |
 |                       |     |                   |     |                       |
 +-----------------------+     +-------------------+     +-----------------------+
           |                             |                          |
@@ -38,7 +38,7 @@ Incluye protección básica: **rate limiting por IP**, **blacklist temporal**, v
 
 ## Instalación
 
-1. Copiar el script `query.py` al servidor donde corre SA-MP o en el proxy.
+1. Copiar el script `pack_scan.py` al servidor donde corre SA-MP o en el proxy.
 2. Ajustar variables del script (encabezado `CONFIGURACIÓN`):
    - `SAMP_SERVER_ADDRESSES`: lista de IPs públicas asociadas.
    - `SAMP_SERVER_LOCALHOST`: IP local donde responde el servidor SA-MP (`127.0.0.1` si corre en la misma máquina).
@@ -46,8 +46,12 @@ Incluye protección básica: **rate limiting por IP**, **blacklist temporal**, v
 
 3. (Opcional) Instalar reglas `iptables` para redirigir queries:
 ```bash
+
 # ejemplo: redirigir rango 66.70.160.240-243 a proxy local 7778 si contienen "SAMP"
 sudo iptables -t nat -A PREROUTING -p udp -m iprange --dst-range 66.70.160.240-66.70.160.243 --dport 7777 -m string --algo bm --string "SAMP" -j DNAT --to-destination 127.0.0.1:7778
+
+# si sólo utilizas una dirección IP, la regla se vería así para redirigir al proxy local 7778 si contienen "SAMP"
+sudo iptables -t nat -A PREROUTING -p udp --dport 7777 -m string --algo bm --string "SAMP" -j REDIRECT --to-port 7778
 
 # permitir entrada local al puerto 7778 si usas firewall local
 sudo iptables -I INPUT -p udp --dport 7778 -j ACCEPT
