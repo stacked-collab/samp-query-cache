@@ -108,14 +108,14 @@ class UDPServer:
                         data = self.sock.recv(1024)[11:]
                         with _lock:
                             globals()[varname] = data
-                        time.sleep(0.5)
+                        time.sleep(QUERY_TIMEOUT)
                 except Exception as e:
                     print(f"[WARN] Error durante consulta: {e}")
-                    time.sleep(2)
+                    time.sleep(QUERY_TIMEOUT)
             else:
                 isonline = False
                 print("[WARN] Servidor no responde al ping. Reintentando...")
-                time.sleep(2)
+                time.sleep(QUERY_TIMEOUT)
 
     def watchdog(self):
         """Reinicia el socket si el servidor deja de responder mucho tiempo."""
