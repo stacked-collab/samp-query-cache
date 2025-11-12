@@ -76,7 +76,7 @@ class UDPServer:
         self.server.socket.settimeout(self.timeout)
         threading.Thread(target=self.querythread, daemon=True).start()
         threading.Thread(target=self.watchdog, daemon=True).start()
-        print(f"[INFO] Proxy activo en {bind_address[0]}:{bind_address[1]} → {SAMP_SERVER_LOCALHOST}:{SERVER_PORT}")
+        print(f"SA-MP Query Cache iniciado | Activo en {bind_address[0]}:{bind_address[1]} → {SAMP_SERVER_LOCALHOST}:{SERVER_PORT}")
         self.server.serve_forever()
 
     def assemblePacket(self, opcode):
