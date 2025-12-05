@@ -7,6 +7,7 @@ from collections import defaultdict, deque
 from typing import Optional, Sequence
 
 # sudo iptables -t nat -A PREROUTING -p udp -m iprange --dst-range 66.70.160.240-66.70.160.243 --dport 7777 -m string --algo bm --string "SAMP" -j REDIRECT --to-port 7778
+# sudo iptables -t nat -A PREROUTING -p udp --dport 7777 -m iprange --dst-range 66.70.160.240-66.70.160.243 -m u32 --u32 "28=0x53414d50 && 38&0xFF=0x6F" -j REDIRECT --to-ports 7778
 
 SERVER_PORT = 7777
 PROXY_PORT = 7778
@@ -25,7 +26,7 @@ QUERY_TIMEOUT = 7
 MAX_PACKET_SIZE = 4096
 RATE_LIMIT_WINDOW = 5
 RATE_LIMIT_MAX = 300
-BLACKLIST_TIME = 60  # segundos de bloqueo temporal
+BLACKLIST_TIME = 300  # segundos de bloqueo temporal
 
 _rate_buckets = defaultdict(deque)
 _blacklist = {}
@@ -203,7 +204,7 @@ class UDPServer:
             if self.ping():
                 isonline = True
                 try:
-                    for opcode, varname in [("i", "info"), ("r", "rules"), ("d", "detail"), ("c", "clients"), ("o", "omp")]:
+                    for opcode, varname in [("o", "omp"), ("i", "info"), ("r", "rules"), ("d", "detail"), ("c", "clients")]:
                         packet = self.assemblePacket(opcode)
                         self.sock.sendto(packet, (SAMP_SERVER_ADDRESSES[0], SERVER_PORT))
                         data = self.sock.recv(1024)[11:]
@@ -237,36 +238,44 @@ class UDPServer:
 
         if len(payload) < 11 or len(payload) > MAX_PACKET_SIZE:
             return
+
         if payload[:4] != b"SAMP":
             return
+
         if payload[4:8] not in SAMP_SERVER_ADDRESS_BYTES_LIST:
             return
+
         if not allowed_rate(client_ip):
-            print(f"[SEC] Bloqueado por rate-limit {client_ip}")
             return
+
         if not isonline:
             return
 
         opcode = payload[10:11]
-        if opcode not in b"pirdco":
-            return
 
         if opcode in (b"c", b"d"):
+            return
+            
+        if opcode not in (b"p", b"o", b"i", b"r", b"d", b"c"):
             return
 
         if opcode == b"p":
             self.server.socket.sendto(payload, client_addr)
             return
 
+        if opcode == b"o":
+            with _lock:
+                data = omp
+            if data:
+                self.server.socket.sendto(payload + data, client_addr)
+            return
+
         with _lock:
-            data_map = {b"i": info, b"r": rules, b"d": detail, b"c": clients, b"o": omp}
+            data_map = {b"i": info, b"r": rules, b"d": detail, b"c": clients}
             data = data_map.get(opcode, b"")
 
         if opcode == b"r" and data:
-            replacements = {
-                "allowed_clients": "0.3.DL",
-                "version": "omp 1.4.0.0"
-            }
+            replacements = {}
             remove = []
             order = [
                 "allowed_clients",
