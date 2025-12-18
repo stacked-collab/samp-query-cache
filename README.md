@@ -38,7 +38,7 @@ Incluye protección básica: **rate limiting por IP**, **blacklist temporal**, v
 
 ## Instalación
 
-1. Copiar el script `pack_scan.py` al servidor donde corre SA-MP o en el proxy.
+1. Copiar el script `query_cache.py` al servidor donde corre SA-MP o en el proxy.
 2. Ajustar variables del script (encabezado `CONFIGURACIÓN`):
    - `SAMP_SERVER_ADDRESSES`: lista de IPs públicas asociadas.
    - `SAMP_SERVER_LOCALHOST`: IP local donde responde el servidor SA-MP (`127.0.0.1` si corre en la misma máquina).
