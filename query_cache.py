@@ -151,9 +151,6 @@ class UDPServer:
         if opcode not in b"pirdc":
             return
 
-        if opcode in (b"c", b"d"):
-            return
-
         if opcode == b"p":
             self.server.socket.sendto(payload, client_addr)
             return
